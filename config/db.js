@@ -1,27 +1,21 @@
 const { Pool } = require('pg');
-require('dotenv').config(); 
-
-// Console log sirf check karne ke liye (Baad mein hata sakte hain)
-console.log("DB User:", process.env.DB_USER);
-console.log("DB Password:", process.env.DB_PASSWORD);
+require('dotenv').config();
 
 const pool = new Pool({
-  user: process.env.DB_USER,
-  host: process.env.DB_HOST,
-  database: process.env.DB_NAME,
-  password: String(process.env.DB_PASSWORD), // Password ko string mein convert kiya
-  port: process.env.DB_PORT,
+  // Railway par ye connectionString automatically DATABASE_URL uthayegi
+  connectionString: process.env.DATABASE_URL, 
+  ssl: {
+    rejectUnauthorized: false // Production (Railway) par SSL zaroori hai
+  }
 });
 
-pool.on('connect', () => {
-  console.log('Postgres Database se connection kamyab raha!');
-});
-
-pool.on('error', (err) => {
-  console.error('Database connection mein error aya:', err);
+// Initial connection test
+pool.query('SELECT NOW()', (err, res) => {
+  if (err) {
+    console.error('Database Connection Error ❌:', err.message);
+  } else {
+    console.log('Database Connected Successfully ✅');
+  }
 });
 
 module.exports = pool;
- 
-
-
